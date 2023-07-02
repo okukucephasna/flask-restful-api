@@ -1,28 +1,22 @@
 from flask import Flask, request
 from flask_restful import Api, Resource
-import mysql.connector
+import pymysql
 
 app = Flask(__name__)
 api = Api(app)
 
 # MySQL configuration
-db_config = {
-    'user': 'root',
-    'password': ' ',
-    'host': 'localhost',
-    'database': 'swiss_collection',
-
-}
+connection = pymysql.connect(host='localhost', user='root', password='',
+                                     database='testone')
 
 class DataResource(Resource):
     def get(self):
         try:
             # Connect to MySQL
-            conn = mysql.connector.connect(**db_config)
-            cursor = conn.cursor()
+            cursor = connection.cursor()
 
             # Execute query
-            query = "SELECT * FROM product"
+            query = "SELECT * FROM users"
             cursor.execute(query)
             result = cursor.fetchall()
 
@@ -34,7 +28,7 @@ class DataResource(Resource):
 
             # Close connection
             cursor.close()
-            conn.close()
+            connection.close()
 
             return {'data': data}
 
@@ -44,8 +38,7 @@ class DataResource(Resource):
     def post(self):
         try:
             # Connect to MySQL
-            conn = mysql.connector.connect(**db_config)
-            cursor = conn.cursor()
+            cursor = connection.cursor()
 
             # Get data from request
             data = request.get_json()
@@ -54,13 +47,13 @@ class DataResource(Resource):
             values = ', '.join(["'{}'".format(value) for value in data.values()])
 
             # Execute query
-            query = "INSERT INTO product ({}) VALUES ({})".format(columns, values)
+            query = "INSERT INTO users ({}) VALUES ({})".format(columns, values)
             cursor.execute(query)
-            conn.commit()
+            connection.commit()
 
             # Close connection
             cursor.close()
-            conn.close()
+            connection.close()
 
             return {'message': 'Data inserted successfully'}
 
@@ -70,8 +63,7 @@ class DataResource(Resource):
     def put(self):
         try:
             # Connect to MySQL
-            conn = mysql.connector.connect(**db_config)
-            cursor = conn.cursor()
+            cursor = connection.cursor()
 
             # Get data from request
             data = request.get_json()
@@ -79,13 +71,13 @@ class DataResource(Resource):
             values = ', '.join(["{}='{}'".format(key, value) for key, value in data.items()])
 
             # Execute query
-            query = "UPDATE product SET {} WHERE id={}".format(values, data['id'])  # Assuming 'id' is the primary key
+            query = "UPDATE users SET {} WHERE id={}".format(values, data['id'])  # Assuming 'id' is the primary key
             cursor.execute(query)
-            conn.commit()
+            connection.commit()
 
             # Close connection
             cursor.close()
-            conn.close()
+            connection.close()
 
             return {'message': 'Data updated successfully'}
 
@@ -95,20 +87,19 @@ class DataResource(Resource):
     def delete(self):
         try:
             # Connect to MySQL
-            conn = mysql.connector.connect(**db_config)
-            cursor = conn.cursor()
+            cursor = connection.cursor()
 
             # Get data from request
             data = request.get_json()
 
             # Execute query
-            query = "DELETE FROM product WHERE id={}".format(data['id'])  # Assuming 'id' is the primary key
+            query = "DELETE FROM users WHERE id={}".format(data['id'])  # Assuming 'id' is the primary key
             cursor.execute(query)
-            conn.commit()
+            connection.commit()
 
             # Close connection
             cursor.close()
-            conn.close()
+            connection.close()
 
             return {'message': 'Data deleted successfully'}
 
